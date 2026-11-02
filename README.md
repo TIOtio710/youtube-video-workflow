@@ -60,4 +60,4 @@ Detail dan cara mengukur: [biaya-heygen.md](.claude/skills/video-youtube/referen
 
 ## Lisensi
 
-Belum ditentukan. Tambahkan file `LICENSE` sebelum dipublikasikan. Skill pihak ketiga di `skills-lock.json` mengikuti lisensi repo sumbernya masing-masing.
+[MIT](LICENSE). Skill pihak ketiga di `skills-lock.json` tidak termasuk di repo ini dan mengikuti lisensi repo sumbernya masing-masing.
