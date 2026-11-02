@@ -33,6 +33,16 @@ Daftar sumbernya dikunci di [`skills-lock.json`](../skills-lock.json). Pasang ul
 | --- | --- |
 | ✅ `video-scriptwriter` ([`.claude/agents/`](../.claude/agents/video-scriptwriter.md)) | Outline, 3 hook, 3 judul, dan script.md dengan struktur retensi, isyarat visual, lafal, dan humanizer wajib |
 | ✅ `bab-mockup-builder` ([`.claude/agents/`](../.claude/agents/bab-mockup-builder.md)) | Subagen per bab demo berat, paralel, tanpa render |
+| ✅ `video-motion-designer` ([`.claude/agents/`](../.claude/agents/video-motion-designer.md)) | Bab ringan: kartu bab, diagram yang tumbuh, kinetic text, overlay di sekitar kartu avatar, dianker ke kata VO |
+| ✅ `video-post-producer` ([`.claude/agents/`](../.claude/agents/video-post-producer.md)) | Timing plan, antrean render satu-satu, gabung + loudness, QC teknis dengan bukti (`final/VERIFY.md`) |
+
+Prinsip gerak, waktu baca, dan QC di kedua agen terakhir ditulis ulang sendiri dari beberapa repo publik (herk-edit-kit, huashu-motion, iart-ai/motion-design-skills, LottieFiles/motion-design-skill, video-shotcraft, lemo-opuscar, openfilm, fframes). Tidak ada file mereka yang disertakan di repo ini.
+
+### Tool opsional
+
+| Tool | Sumber | Guna |
+| --- | --- | --- |
+| `preflight.mjs` | `nateherkai/herk-edit-kit` (`scripts/`, MIT) | Menangkap bug HyperFrames yang lolos lint (timeline kosong, sub-komposisi hilang). Salin ke `tools/vendor/herk-edit-kit/` beserta LICENSE-nya. Node murni, tanpa jaringan |
 | `general-purpose` (bawaan Claude Code) | Riset luas atau tugas sampingan |
 | Agen orkestrator gaya "project shepherd" (opsional, dari koleksi agen pihak ketiga) | Memandu alur dan evaluasi; alurnya sendiri sudah ada di skill `video-youtube` |
 

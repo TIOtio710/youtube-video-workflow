@@ -35,7 +35,8 @@ Orkestrator (sesi utama) membagi kerja ke agen di `.claude/agents/`. Agen bertan
 | Bab demo UI | `bab-mockup-builder` (repo ini) |
 | Review snapshot per bab | pihak ketiga, mis. "Evidence Collector" (opsional), dengan checklist: caption, tabrakan layout, sinkron kata, logo, teks ≥28 px |
 | Cek akhir | pihak ketiga, mis. "Reality Checker" (opsional) |
-| Bab ringan, timing plan, render, gabung | orkestrator |
+| Bab ringan (kartu bab, diagram, kinetic, overlay avatar) | `video-motion-designer` (repo ini) |
+| Timing plan, antrean render, gabung, QC teknis (`final/VERIFY.md`) | `video-post-producer` (repo ini) |
 
 ## Alur
 
@@ -48,15 +49,15 @@ Orkestrator (sesi utama) membagi kerja ke agen di `.claude/agents/`. Agen bertan
 3. **Outline + script** → delegasikan ke agen `video-scriptwriter`. Hasilnya `hooks.md` (3 hook + 3 judul ≤60 karakter) dan `script.md` dalam format yang dibaca mesin ([references/format-script.md](references/format-script.md)), dengan isyarat visual per paragraf dan bagian `### Lafal`. Agen itu wajib menjalankan `humanizer` dengan contoh suara asli. Mode dengan gate: user memilih hook. Mode ditinggal: pakai pilihan agen dan catat alasannya.
 4. **VO**: `node tools/heygen-vo.mjs video/<slug>` → satu panggilan TTS per bab, dipotong per paragraf dengan timestamp kata.
 5. **Avatar** (background, mulai sedini mungkin karena antre ±12–17 menit per klip): `node tools/heygen-video.mjs video/<slug> --audio vo/intro.url.txt --name intro`. Engine default `avatar_iii` (hemat). Cek wajah dan lip-sync begitu jadi. Penutup: pakai ulang dari `templates/outro-cta/` kalau sudah pernah dibuat.
-6. **Kerangka bab**: `plan.json` per bab → `node tools/bab-build.mjs video/<slug>/bab/<nn>`. Durasi tiap bab langsung pasti. Atur jeda di `plan.json` sampai total masuk target **sebelum** membuat visual.
+6. **Kerangka bab** (agen `video-post-producer`, tugas A): `plan.json` per bab → `node tools/bab-build.mjs video/<slug>/bab/<nn>`. Durasi tiap bab langsung pasti. Atur jeda di `plan.json` sampai total masuk target **sebelum** membuat visual.
 7. **Storyboard** → `storyboard.md`: per bab, jenis visual (mockup UI, diagram, kinetic text, avatar) dan beat per kalimat VO.
 8. **Visual** `bab/<nn>/compositions/scene.html`:
    - Semua waktu dari `T.<klip>` dan `at("<klip>", "kata", n)`, bukan angka tebakan.
-   - Bab ringan dikerjakan sendiri. Bab demo berat didelegasikan ke subagen `bab-mockup-builder` (paralel, satu bab per subagen) dengan kit dari `templates/`.
+   - Bab ringan (kartu bab, diagram, kinetic, overlay avatar) → `video-motion-designer`. Bab demo UI → `bab-mockup-builder` dengan kit dari `templates/`. Satu bab per subagen, boleh paralel.
    - Ikuti skill `hyperframes` (kontrak render). Skill `explainer-video`, `diagram-animation`, `kinetic-typography`, `lower-thirds` hanya referensi craft.
 9. **Cek per bab**: `npx hyperframes check` (0 error) + `npx hyperframes snapshot --at <beat…>` dan **lihat gambarnya**. Snapshot menangkap bug yang lolos dari check (caption menumpuk, timeline diam).
-10. **Render per bab**, satu render sekaligus, berantai di background begitu bab lolos cek: `npx hyperframes render -o final/bab/<nn-nama>.mp4 --quality looks`.
-11. **Gabung**: `node tools/gabung.mjs video/<slug> <slug> --music final/music/<track>.mp3` → mp4 final, loudness sesuai config, SRT.
+10. **Render per bab** (`video-post-producer`, tugas B), satu render sekaligus, berantai di background begitu bab lolos cek: `npx hyperframes render -o final/bab/<nn-nama>.mp4 --quality looks`.
+11. **Gabung + QC** (`video-post-producer`, tugas C–D): `node tools/gabung.mjs video/<slug> <slug> --music final/music/<track>.mp3` → mp4 final (loudness sesuai config, diukur setelah encode), SRT, dan `final/VERIFY.md`.
 12. **Thumbnail + paket upload**: thumbnail 1280×720 dibuat sebagai proyek HyperFrames, lalu `snapshot --at 0.5`. Paket upload: 3 judul, deskripsi + chapter (dari durasi bab), tag, komentar sematkan, pengingat label konten sintetis.
 13. **Evaluasi singkat** di `workflow-log.md`: apa yang lambat, mahal, atau rusak. Perbaiki tools-nya, bukan cuma videonya.
 
