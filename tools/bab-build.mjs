@@ -158,7 +158,10 @@ ${sfxTags}
     </div>
     <script>
       window.__timelines = window.__timelines || {};
-      window.__timelines["main"] = gsap.timeline({ paused: true });
+      // Timeline root diisi sepanjang bab supaya durasinya tidak 0 (aturan "isi slot", dari herk-edit-kit).
+      const tl = gsap.timeline({ paused: true });
+      tl.to({}, { duration: ${total} }, 0);
+      window.__timelines["main"] = tl;
     </script>
   </body>
 </html>
