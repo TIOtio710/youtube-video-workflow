@@ -1,0 +1,2325 @@
+<!--
+  Claude Code UI kit (Claude Desktop, tab Code) + Slack, untuk HyperFrames.
+  BUKAN composition. Salin potongan di bawah ke compositions/scene.html (lihat README.md).
+  Sumber: video/2026-11-02-claude-scheduled-tasks/bab/02-demo-jadwal/compositions/scene.html
+  Semua koordinat di README dihitung dari CSS ini; ubah CSS = hitung ulang target klik.
+-->
+
+<!-- =================== 1. CSS (taruh di <template><style>) =================== -->
+<style>
+    @font-face {
+      font-family: "UISerif";
+      src: local("Georgia");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "UISerif";
+      src: local("Georgia Bold"), local("Georgia-Bold");
+      font-weight: 700;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #faf9f5;
+      font-family: "Inter", sans-serif;
+      color: #141413;
+      --accent: #d97757;
+      --send: #c6613f;
+      --line: #e6e3d9;
+      --muted: #7b796f;
+      --side: #f2f0e8;
+      --field: #dedbd0;
+    }
+    #root * {
+      box-sizing: border-box;
+    }
+    /* Kamera: semua UI di dalam #cam, zoom ala Screen Studio. */
+    #cam {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+    }
+    .abs {
+      position: absolute;
+    }
+    svg.ic {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: none;
+    }
+    .logo {
+      width: 18px;
+      height: 18px;
+      flex: none;
+      display: block;
+    }
+    .ch {
+      opacity: 0;
+    }
+
+    /* ---------- Title bar ---------- */
+    #titlebar {
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 40px;
+      background: var(--side);
+      display: flex;
+      align-items: center;
+      color: #57554d;
+    }
+    #titlebar .tb-left {
+      display: flex;
+      gap: 18px;
+      padding-left: 18px;
+      align-items: center;
+    }
+    #titlebar .tb-right {
+      margin-left: auto;
+      display: flex;
+      height: 40px;
+    }
+    #titlebar .win {
+      width: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #titlebar .win svg {
+      width: 12px;
+      height: 12px;
+      stroke-width: 1.2;
+    }
+
+    /* ---------- Sidebar (tab Code) ---------- */
+    #sidebar {
+      left: 0;
+      top: 40px;
+      width: 300px;
+      height: 1040px;
+      background: var(--side);
+      border-right: 1px solid var(--line);
+    }
+    #sidebar .brand {
+      left: 14px;
+      top: 14px;
+      width: 272px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+    }
+    #sidebar .brand b {
+      font-family: "UISerif", serif;
+      font-weight: 400;
+      font-size: 25px;
+      letter-spacing: -0.3px;
+    }
+    #modes {
+      left: 14px;
+      top: 66px;
+      width: 272px;
+      height: 36px;
+      border-radius: 10px;
+      background: #e8e5db;
+      display: flex;
+      padding: 3px;
+    }
+    #modes .seg {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #5d5b53;
+      border-radius: 8px;
+    }
+    #modes .seg svg {
+      width: 15px;
+      height: 15px;
+    }
+    #modes .seg.on {
+      background: #ffffff;
+      color: #141413;
+      font-weight: 700;
+      box-shadow: 0 1px 2px rgba(40, 35, 20, 0.12);
+    }
+    .nav {
+      left: 14px;
+      width: 272px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 38px;
+      padding: 0 10px;
+      border-radius: 8px;
+      font-size: 15.5px;
+      color: #2c2b27;
+    }
+    .nav .plus {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e3dfd3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -2px;
+    }
+    .nav .plus svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2.2;
+    }
+    #nav-new {
+      top: 118px;
+    }
+    #nav-sched {
+      top: 158px;
+    }
+    #nav-cust {
+      top: 198px;
+    }
+    .side-label {
+      left: 24px;
+      top: 252px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    #ses-list {
+      left: 14px;
+      top: 278px;
+      width: 272px;
+    }
+    .ses {
+      font-size: 14.5px;
+      color: #3a3934;
+      padding: 0 10px;
+      height: 34px;
+      line-height: 34px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-radius: 8px;
+    }
+    #ses-new {
+      left: 0;
+      top: 0;
+      width: 272px;
+      background: #e8e5db;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #ses-new svg {
+      width: 15px;
+      height: 15px;
+      color: var(--accent);
+    }
+    #profile {
+      left: 0;
+      bottom: 0;
+      width: 300px;
+      height: 72px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #3d3929;
+      color: #faf9f5;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pname {
+      font-size: 14.5px;
+      font-weight: 700;
+    }
+    .pplan {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ---------- Halaman (area utama x 300..1920, y 40..1080) ---------- */
+    .page {
+      left: 300px;
+      top: 40px;
+      width: 1620px;
+      height: 1040px;
+      opacity: 0;
+    }
+    #pg-home {
+      opacity: 1;
+    }
+    .box {
+      background: #ffffff;
+      border: 1px solid var(--field);
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(40, 35, 20, 0.04), 0 10px 30px rgba(40, 35, 20, 0.05);
+    }
+    .btn {
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.2;
+    }
+    .btn.dark {
+      background: #141413;
+      color: #faf9f5;
+    }
+    .btn.ghost {
+      border: 1px solid var(--field);
+      background: #ffffff;
+      color: #2c2b27;
+      font-weight: 400;
+    }
+    .h-serif {
+      font-family: "UISerif", serif;
+      font-weight: 400;
+      color: #1d1c19;
+      letter-spacing: -0.4px;
+    }
+    .muted {
+      color: var(--muted);
+    }
+
+    /* Home tab Code */
+    #home-greet {
+      left: 0;
+      top: 290px;
+      width: 1620px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      font-family: "UISerif", serif;
+      font-size: 44px;
+      color: #3d3929;
+      letter-spacing: -0.5px;
+    }
+    #home-greet svg {
+      width: 44px;
+      height: 44px;
+    }
+    #home-box {
+      left: 410px;
+      top: 384px;
+      width: 800px;
+      height: 132px;
+    }
+    #home-box .ph {
+      left: 24px;
+      top: 22px;
+      color: #8c8a82;
+      font-size: 19px;
+    }
+    .in-row {
+      left: 16px;
+      right: 16px;
+      bottom: 14px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pill {
+      height: 32px;
+      padding: 0 11px;
+      border-radius: 9px;
+      border: 1px solid var(--field);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      color: #4a4842;
+      background: #ffffff;
+      white-space: nowrap;
+    }
+    .pill svg {
+      width: 15px;
+      height: 15px;
+    }
+    .sendb {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: #e9b9a6;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+    }
+    .sendb svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.2;
+    }
+
+    /* Daftar Scheduled tasks */
+    #ls-title {
+      left: 160px;
+      top: 62px;
+      font-size: 34px;
+      line-height: 44px;
+    }
+    #ls-sub {
+      left: 160px;
+      top: 114px;
+      font-size: 15.5px;
+    }
+    #ls-new {
+      left: 1320px;
+      top: 66px;
+      width: 140px;
+    }
+    #ls-head {
+      left: 160px;
+      top: 168px;
+      width: 1300px;
+      height: 32px;
+      font-size: 13px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+    }
+    .colA {
+      left: 16px;
+    }
+    .colB {
+      left: 520px;
+    }
+    .colC {
+      left: 820px;
+    }
+    .colD {
+      left: 1100px;
+    }
+    #ls-row {
+      left: 160px;
+      top: 200px;
+      width: 1300px;
+      height: 72px;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+    #ls-row .nm {
+      top: 15px;
+      font-weight: 700;
+      font-size: 15.5px;
+    }
+    #ls-row .sb {
+      top: 40px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    #ls-row .cell {
+      top: 25px;
+      color: #3a3934;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    #ls-row .cell svg {
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+    }
+    .tgl {
+      width: 40px;
+      height: 22px;
+      border-radius: 11px;
+      background: var(--send);
+    }
+    .tgl::after {
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+    }
+    #ls-row .tgl {
+      left: 1240px;
+      top: 25px;
+    }
+
+    /* Menu Local / Cloud */
+    #menu-new {
+      left: 1040px;
+      top: 114px;
+      width: 420px;
+      height: 162px;
+      background: #ffffff;
+      border: 1px solid var(--field);
+      border-radius: 14px;
+      box-shadow: 0 12px 34px rgba(40, 35, 20, 0.14);
+      opacity: 0;
+    }
+    .mi {
+      left: 6px;
+      width: 406px;
+      border-radius: 10px;
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+    }
+    .mi .mic {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #f0eee6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3a3934;
+      flex: none;
+    }
+    .mi .mt {
+      font-size: 15.5px;
+      font-weight: 700;
+      line-height: 20px;
+    }
+    .mi .md {
+      font-size: 13.5px;
+      line-height: 19px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    #mi-local {
+      top: 6px;
+      height: 64px;
+    }
+    #mi-cloud {
+      top: 74px;
+      height: 82px;
+    }
+
+    /* Form New scheduled task */
+    #f-head {
+      left: 360px;
+      top: 26px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #f-head .t {
+      font-size: 30px;
+      line-height: 40px;
+    }
+    #f-head .tag {
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 13px;
+      background: #f0eee6;
+      font-size: 13px;
+      color: #4a4842;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 4px;
+    }
+    #f-head .tag svg {
+      width: 14px;
+      height: 14px;
+    }
+    #f-cancel {
+      left: 1062px;
+      top: 26px;
+      width: 90px;
+    }
+    #f-create {
+      left: 1164px;
+      top: 26px;
+      width: 96px;
+      color: #ffffff;
+    }
+    #f-create .off,
+    #f-create .on {
+      position: absolute;
+      inset: 0;
+      border-radius: 10px;
+    }
+    #f-create .off {
+      background: #cfccc2;
+    }
+    #f-create .on {
+      background: #141413;
+      opacity: 0;
+    }
+    #f-create span {
+      position: relative;
+    }
+    .flabel {
+      left: 360px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #2c2b27;
+    }
+    .flabel .muted {
+      font-weight: 400;
+      font-size: 13.5px;
+      margin-left: 10px;
+    }
+    .field {
+      background: #ffffff;
+      border: 1px solid var(--field);
+      border-radius: 12px;
+    }
+    .ring {
+      position: absolute;
+      inset: -1px;
+      border-radius: 12px;
+      border: 2px solid #8fb4e8;
+      opacity: 0;
+    }
+    #f-name {
+      left: 360px;
+      top: 126px;
+      width: 900px;
+      height: 48px;
+    }
+    #f-name .val,
+    #f-name .ph {
+      left: 16px;
+      top: 13px;
+      font-size: 17px;
+      line-height: 22px;
+      white-space: pre;
+    }
+    .ph {
+      color: #9a988f;
+    }
+    .caret0 {
+      width: 2px;
+      height: 22px;
+      background: #141413;
+      opacity: 0;
+    }
+    #f-name .caret0 {
+      left: 16px;
+      top: 13px;
+    }
+    #f-instr {
+      left: 360px;
+      top: 224px;
+      width: 900px;
+      height: 300px;
+    }
+    #f-instr .ph {
+      left: 20px;
+      top: 18px;
+      font-size: 17px;
+    }
+    #f-instr .caret0 {
+      left: 20px;
+      top: 21px;
+    }
+    #prompt {
+      left: 20px;
+      top: 18px;
+      width: 860px;
+      font-size: 17px;
+      line-height: 27px;
+      color: #1d1c19;
+    }
+    #pr-b {
+      margin-top: 12px;
+    }
+    #hl {
+      --hla: 0.5;
+      background-image: linear-gradient(rgba(255, 214, 0, var(--hla)), rgba(255, 214, 0, var(--hla)));
+      background-repeat: no-repeat;
+      background-position: 0 90%;
+      background-size: 0% 62%;
+    }
+    #f-instr .in-row .pill {
+      height: 32px;
+    }
+    #f-model {
+      left: 718px;
+      top: 2px;
+      width: 150px;
+      height: 36px;
+      justify-content: center;
+      font-size: 14.5px;
+    }
+    #f-model .lb {
+      position: relative;
+      width: 98px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #f-model .alt {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+    }
+    #menu-model {
+      left: 944px;
+      top: 280px;
+      width: 300px;
+      height: 184px;
+      background: #ffffff;
+      border: 1px solid var(--field);
+      border-radius: 14px;
+      box-shadow: 0 12px 34px rgba(40, 35, 20, 0.14);
+      opacity: 0;
+    }
+    .mm {
+      left: 6px;
+      width: 286px;
+      height: 56px;
+      border-radius: 9px;
+      padding: 9px 12px;
+    }
+    .mm .mt {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 19px;
+    }
+    .mm .md {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .mm .chk {
+      right: 12px;
+      top: 18px;
+      color: var(--send);
+    }
+    .mm .chk svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.4;
+    }
+    #mm-opus {
+      top: 6px;
+    }
+    #mm-sonnet {
+      top: 64px;
+    }
+    #mm-haiku {
+      top: 122px;
+    }
+    #mm-sonnet .chk {
+      opacity: 0;
+    }
+
+    .tcard {
+      top: 582px;
+      width: 292px;
+      height: 48px;
+      border-radius: 12px;
+      border: 1px solid var(--field);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      font-size: 15.5px;
+      color: #2c2b27;
+    }
+    .tcard .sel {
+      position: absolute;
+      inset: -1px;
+      border-radius: 12px;
+      border: 2px solid #141413;
+      background: rgba(20, 20, 19, 0.035);
+      opacity: 0;
+    }
+    #tc-sched {
+      left: 360px;
+    }
+    #tc-gh {
+      left: 664px;
+    }
+    #tc-api {
+      left: 968px;
+    }
+    #f-srow {
+      left: 360px;
+      top: 642px;
+      width: 900px;
+      height: 48px;
+      opacity: 0;
+    }
+    #f-freq {
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      font-size: 16px;
+      gap: 8px;
+    }
+    #f-freq .lbs {
+      position: relative;
+      flex: 1;
+      height: 22px;
+    }
+    #f-freq .lbs span {
+      position: absolute;
+      left: 0;
+      top: 1px;
+    }
+    #freq-new {
+      opacity: 0;
+    }
+    #f-at {
+      left: 232px;
+      top: 14px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+    #f-time {
+      left: 240px;
+      top: 0;
+      width: 130px;
+      height: 48px;
+    }
+    #f-time .old,
+    #f-time .val {
+      left: 16px;
+      top: 13px;
+      font-size: 17px;
+      line-height: 22px;
+      font-variant-numeric: tabular-nums;
+      white-space: pre;
+    }
+    #f-time .selbg {
+      left: 13px;
+      top: 11px;
+      width: 50px;
+      height: 26px;
+      border-radius: 3px;
+      background: #b9d3f5;
+      opacity: 0;
+    }
+    #f-time svg {
+      position: absolute;
+      right: 14px;
+      top: 15px;
+      width: 18px;
+      height: 18px;
+      color: var(--muted);
+    }
+    #f-tz {
+      left: 388px;
+      top: 14px;
+      font-size: 14.5px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #f-tz svg {
+      width: 15px;
+      height: 15px;
+    }
+    #f-addtrig {
+      left: 700px;
+      top: 14px;
+      font-size: 14.5px;
+      color: #4a4842;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #f-addtrig svg {
+      width: 15px;
+      height: 15px;
+    }
+    #menu-freq {
+      left: 360px;
+      top: 698px;
+      width: 220px;
+      height: 164px;
+      background: #ffffff;
+      border: 1px solid var(--field);
+      border-radius: 12px;
+      box-shadow: 0 12px 34px rgba(40, 35, 20, 0.14);
+      opacity: 0;
+    }
+    .fi {
+      left: 6px;
+      width: 206px;
+      height: 38px;
+      border-radius: 8px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+    }
+    .fi svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.4;
+      color: var(--send);
+    }
+    #fi-hourly {
+      top: 6px;
+    }
+    #fi-daily {
+      top: 44px;
+    }
+    #fi-week {
+      top: 82px;
+    }
+    #fi-weekly {
+      top: 120px;
+    }
+
+    .cchip {
+      top: 744px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--field);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      font-size: 14.5px;
+      color: #2c2b27;
+      white-space: nowrap;
+    }
+    .cchip .x {
+      margin-left: auto;
+      width: 16px;
+      height: 16px;
+      color: #8c8a82;
+    }
+    .cchip .gen {
+      width: 18px;
+      height: 18px;
+      color: #6b695f;
+    }
+    #ch-gc {
+      left: 360px;
+      width: 190px;
+    }
+    #ch-gm {
+      left: 560px;
+      width: 112px;
+    }
+    #ch-sl {
+      left: 682px;
+      width: 108px;
+    }
+    #ch-no {
+      left: 800px;
+      width: 116px;
+    }
+    #ch-dr {
+      left: 926px;
+      width: 168px;
+    }
+    #ch-li {
+      left: 1104px;
+      width: 112px;
+    }
+
+    /* Detail task */
+    #d-crumb {
+      left: 160px;
+      top: 26px;
+      font-size: 14px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+    }
+    #d-title {
+      left: 160px;
+      top: 54px;
+      font-size: 34px;
+      line-height: 44px;
+    }
+    #d-tgl {
+      left: 356px;
+      top: 66px;
+    }
+    #d-tgl-lb {
+      left: 406px;
+      top: 67px;
+      font-size: 14px;
+      color: #3a3934;
+    }
+    #d-edit {
+      left: 1248px;
+      top: 58px;
+      width: 80px;
+    }
+    #d-run {
+      left: 1340px;
+      top: 58px;
+      width: 120px;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .card .ct {
+      left: 20px;
+      top: 16px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    #d-instr {
+      left: 160px;
+      top: 130px;
+      width: 820px;
+      height: 226px;
+    }
+    #d-instr .tx {
+      left: 20px;
+      top: 44px;
+      width: 780px;
+      font-size: 15.5px;
+      line-height: 24px;
+      color: #2c2b27;
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    #d-instr .ft {
+      left: 20px;
+      top: 178px;
+      display: flex;
+      gap: 8px;
+    }
+    #d-instr .ft .pill {
+      height: 30px;
+      font-size: 13px;
+      background: #faf9f5;
+    }
+    #d-trig {
+      left: 1000px;
+      top: 130px;
+      width: 460px;
+      height: 104px;
+    }
+    #d-trig .big {
+      left: 20px;
+      top: 42px;
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    #d-trig .big svg {
+      width: 19px;
+      height: 19px;
+      color: var(--accent);
+    }
+    #d-trig .sm {
+      left: 48px;
+      top: 70px;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+    #d-conn {
+      left: 1000px;
+      top: 246px;
+      width: 460px;
+      height: 110px;
+    }
+    #d-conn .row {
+      left: 20px;
+      top: 50px;
+      display: flex;
+      gap: 8px;
+    }
+    #d-conn .row .pill {
+      height: 34px;
+      font-size: 13.5px;
+    }
+    #d-hist-h {
+      left: 160px;
+      top: 384px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    #d-empty,
+    #d-runrow {
+      left: 160px;
+      top: 418px;
+      width: 1300px;
+      height: 58px;
+      border-radius: 12px;
+    }
+    #d-empty {
+      border: 1px dashed var(--field);
+      font-size: 14.5px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+    }
+    #d-runrow {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 20px;
+      font-size: 15px;
+    }
+    #d-runrow .badge {
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 13px;
+      background: #fbeee8;
+      color: #a8502f;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    #d-spin {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.6;
+    }
+    #d-runrow .open {
+      margin-left: auto;
+      color: #4a4842;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+    }
+    #d-runrow .open svg {
+      width: 15px;
+      height: 15px;
+    }
+    #d-runhover {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: rgba(20, 20, 19, 0.04);
+      opacity: 0;
+    }
+
+    /* Sesi run */
+    #s-head {
+      left: 0;
+      top: 0;
+      width: 1620px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      gap: 8px;
+      font-size: 15.5px;
+      color: #2c2b27;
+      border-bottom: 1px solid var(--line);
+    }
+    #s-head .tag {
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 12px;
+      background: #f0eee6;
+      font-size: 12.5px;
+      color: #4a4842;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: 6px;
+    }
+    #s-head .tag svg {
+      width: 13px;
+      height: 13px;
+    }
+    #s-head .rt {
+      margin-left: auto;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    #s-bubble {
+      right: 410px;
+      top: 84px;
+      width: 640px;
+      background: #f0eee6;
+      border-radius: 18px;
+      padding: 13px 20px;
+      font-size: 16px;
+      line-height: 25px;
+      color: #2c2b27;
+    }
+    #s-bubble .tx {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    #s-bubble .more {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .s-tx {
+      left: 410px;
+      width: 800px;
+      font-family: "UISerif", serif;
+      font-size: 19px;
+      line-height: 28px;
+      color: #1d1c19;
+      opacity: 0;
+    }
+    .tool {
+      left: 410px;
+      width: 800px;
+      height: 48px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 16px;
+      font-size: 15px;
+      color: #2c2b27;
+      opacity: 0;
+    }
+    .tool b {
+      font-weight: 700;
+    }
+    .tool .arg {
+      color: var(--muted);
+    }
+    .tool .st {
+      margin-left: auto;
+      position: relative;
+      width: 130px;
+      height: 26px;
+    }
+    .tool .spin {
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+      stroke-width: 2.6;
+    }
+    .tool .res {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 13px;
+      background: #eaf3ec;
+      color: #2f6b45;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    .tool .res svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.6;
+    }
+    #s-t1 {
+      top: 214px;
+    }
+    #s-k1 {
+      top: 252px;
+    }
+    #s-t2 {
+      top: 318px;
+    }
+    #s-k2 {
+      top: 356px;
+    }
+    #s-t3 {
+      top: 422px;
+    }
+    #s-k3 {
+      top: 460px;
+    }
+    #s-t4 {
+      top: 526px;
+    }
+    #s-status {
+      left: 410px;
+      top: 214px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      color: #a8502f;
+      opacity: 0;
+    }
+    #s-spark {
+      width: 24px;
+      height: 24px;
+    }
+    #s-reply {
+      left: 410px;
+      top: 912px;
+      width: 800px;
+      height: 96px;
+    }
+    #s-reply .ph {
+      left: 22px;
+      top: 18px;
+      font-size: 17px;
+    }
+
+    /* Notifikasi Windows */
+    #toast {
+      left: 1500px;
+      top: 900px;
+      width: 392px;
+      height: 106px;
+      background: #f3f3f3;
+      border: 1px solid #d9d9d9;
+      border-radius: 10px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+      opacity: 0;
+      font-family: "Inter", sans-serif;
+    }
+    #toast .app {
+      left: 16px;
+      top: 12px;
+      font-size: 12.5px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    #toast .app img {
+      width: 14px;
+      height: 14px;
+    }
+    #toast .ti {
+      left: 16px;
+      top: 38px;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    #toast .bd {
+      left: 16px;
+      top: 62px;
+      width: 360px;
+      font-size: 13.5px;
+      color: #444;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ---------- Slack ---------- */
+    #slack {
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      opacity: 0;
+    }
+    #slack-in {
+      position: absolute;
+      inset: 0;
+      background: #3f0e40;
+      font-family: "Lato", sans-serif;
+    }
+    #sk-top {
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      color: #e9dfe9;
+    }
+    #sk-search {
+      left: 660px;
+      top: 7px;
+      width: 600px;
+      height: 26px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+    }
+    #sk-search svg {
+      width: 14px;
+      height: 14px;
+    }
+    #sk-top .winc {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 40px;
+      display: flex;
+    }
+    #sk-top .winc div {
+      width: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #sk-top .winc svg {
+      width: 11px;
+      height: 11px;
+      stroke-width: 1.2;
+    }
+    #sk-rail {
+      left: 0;
+      top: 40px;
+      width: 72px;
+      height: 1040px;
+    }
+    #sk-ws {
+      left: 18px;
+      top: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: #ffffff;
+      color: #3f0e40;
+      font-weight: 900;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rl {
+      left: 8px;
+      width: 56px;
+      text-align: center;
+      color: #f2e8f2;
+      font-size: 11px;
+    }
+    .rl .tile {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 3px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rl .tile svg {
+      width: 19px;
+      height: 19px;
+    }
+    .rl.on .tile {
+      background: rgba(255, 255, 255, 0.22);
+    }
+    #sk-side {
+      left: 72px;
+      top: 40px;
+      width: 258px;
+      height: 1040px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 15px;
+    }
+    #sk-side .wsn {
+      left: 16px;
+      top: 14px;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #sk-side .wsn svg {
+      width: 15px;
+      height: 15px;
+    }
+    .si {
+      left: 8px;
+      width: 242px;
+      height: 28px;
+      border-radius: 6px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      white-space: nowrap;
+    }
+    .si svg {
+      width: 16px;
+      height: 16px;
+    }
+    .si .hash {
+      width: 16px;
+      text-align: center;
+      font-size: 16px;
+      opacity: 0.8;
+    }
+    .si .av {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .si.on {
+      background: #f9edff;
+      color: #3f0e40;
+      font-weight: 700;
+    }
+    .sk-sec {
+      left: 18px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.72);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sk-sec svg {
+      width: 13px;
+      height: 13px;
+    }
+    .appb {
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 3px;
+      background: rgba(29, 28, 29, 0.13);
+      color: #616061;
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      letter-spacing: 0.3px;
+    }
+    .si .appb {
+      background: rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .si.on .appb {
+      background: rgba(63, 14, 64, 0.13);
+      color: #3f0e40;
+    }
+    .cl-av {
+      background: #d97757;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cl-av svg {
+      width: 72%;
+      height: 72%;
+    }
+    #sk-main {
+      left: 330px;
+      top: 40px;
+      width: 1582px;
+      height: 1032px;
+      background: #ffffff;
+      border-radius: 8px;
+      color: #1d1c1d;
+    }
+    #sk-head {
+      left: 0;
+      top: 0;
+      width: 1582px;
+      height: 54px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 9px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+    #sk-head .cl-av {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+    }
+    #sk-intro {
+      left: 30px;
+      top: 92px;
+    }
+    #sk-intro .cl-av {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+    }
+    #sk-intro .nm {
+      position: absolute;
+      left: 90px;
+      top: 6px;
+      font-size: 22px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    #sk-intro .ds {
+      position: absolute;
+      left: 90px;
+      top: 42px;
+      font-size: 15px;
+      color: #616061;
+      white-space: nowrap;
+    }
+    #sk-day {
+      left: 0;
+      top: 356px;
+      width: 1582px;
+      height: 1px;
+      background: #e8e8e8;
+    }
+    #sk-day span {
+      position: absolute;
+      left: 741px;
+      top: -14px;
+      height: 28px;
+      padding: 0 16px;
+      border: 1px solid #e8e8e8;
+      border-radius: 14px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+    #sk-msg {
+      left: 20px;
+      top: 386px;
+      width: 1000px;
+    }
+    #sk-msg .cl-av {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+    #sk-msg .who {
+      position: absolute;
+      left: 54px;
+      top: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 15.5px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    #sk-msg .who .tm {
+      font-weight: 400;
+      font-size: 12.5px;
+      color: #616061;
+    }
+    #sk-body {
+      position: absolute;
+      left: 54px;
+      top: 26px;
+      width: 940px;
+      font-size: 15.5px;
+      line-height: 25px;
+    }
+    #sk-body .gap {
+      height: 9px;
+    }
+    #sk-body b {
+      font-weight: 900;
+    }
+    #sk-body .li {
+      padding-left: 22px;
+      position: relative;
+    }
+    #sk-body .li i {
+      position: absolute;
+      left: 4px;
+      top: 0;
+      font-style: normal;
+    }
+    .mk {
+      --mka: 0.45;
+      background-image: linear-gradient(rgba(255, 214, 0, var(--mka)), rgba(255, 214, 0, var(--mka)));
+      background-repeat: no-repeat;
+      background-position: 0 85%;
+      background-size: 0% 60%;
+    }
+    #sk-comp {
+      left: 20px;
+      top: 912px;
+      width: 1542px;
+      height: 100px;
+      border: 1px solid #c4c4c4;
+      border-radius: 9px;
+    }
+    #sk-comp .ph {
+      left: 16px;
+      top: 14px;
+      font-size: 15px;
+      color: #8a8a8a;
+    }
+
+    /* ---------- Kursor ---------- */
+    #cursor {
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      z-index: 50;
+    }
+    #cursor svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+    }
+    #cur-hand {
+      opacity: 0;
+    }
+    #ripple {
+      left: 0;
+      top: 0;
+      width: 44px;
+      height: 44px;
+      margin: -22px 0 0 -22px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(217, 119, 87, 0.85);
+      background: rgba(217, 119, 87, 0.18);
+      z-index: 49;
+      opacity: 0;
+    }
+
+    /* ---------- Overlay editor (di luar kamera) ---------- */
+    .note {
+      background: #ffd600;
+      color: #141413;
+      border-radius: 14px;
+      padding: 14px 20px 16px;
+      box-shadow: 0 10px 30px rgba(20, 20, 19, 0.28);
+      opacity: 0;
+      z-index: 55;
+    }
+    .note .k {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .note .v {
+      font-size: 25px;
+      font-weight: 700;
+      line-height: 32px;
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+    .note .arw {
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+    #note-rt {
+      left: 748px;
+      top: 92px;
+    }
+    #note-rt .arw {
+      left: -11px;
+      top: 26px;
+      border-top: 11px solid transparent;
+      border-bottom: 11px solid transparent;
+      border-right: 12px solid #ffd600;
+    }
+    #note-jam {
+      left: 700px;
+      top: 594px;
+    }
+    #note-jam .arw {
+      left: 38px;
+      top: -11px;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-bottom: 12px solid #ffd600;
+    }
+    #badge-wrap {
+      left: 330px;
+      top: 262px;
+      width: 1590px;
+      display: flex;
+      justify-content: center;
+      z-index: 55;
+    }
+    #badge {
+      height: 72px;
+      padding: 0 30px 0 22px;
+      border-radius: 36px;
+      background: #141413;
+      color: #f5f3ec;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 30px;
+      font-weight: 700;
+      box-shadow: 0 14px 40px rgba(20, 20, 19, 0.3);
+      opacity: 0;
+    }
+    #badge svg {
+      width: 34px;
+      height: 34px;
+      color: #ffd600;
+      stroke-width: 2.2;
+    }
+    #badge .dot {
+      color: #8c8a82;
+    }
+
+    /* Kartu bab */
+    #card {
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      background: #141413;
+      z-index: 70;
+    }
+    #card-in {
+      left: 260px;
+      top: 410px;
+      height: 230px;
+    }
+    #card-bar {
+      left: 0;
+      top: 0;
+      width: 10px;
+      height: 230px;
+      border-radius: 5px;
+      background: #ffd600;
+    }
+    #card-label {
+      left: 48px;
+      top: 18px;
+      font-size: 30px;
+      font-weight: 700;
+      color: #ffd600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    #card-title {
+      left: 46px;
+      top: 72px;
+      font-size: 100px;
+      line-height: 120px;
+      font-weight: 900;
+      color: #f5f3ec;
+      letter-spacing: -2px;
+      white-space: nowrap;
+    }
+    #card-title .num {
+      color: #8c8a82;
+    }
+  </style>
+
+<!-- =================== 2. MARKUP (urutan = urutan tumpuk) =================== -->
+<div id="root" data-composition-id="scene" data-width="1920" data-height="1080" data-layout-allow-overflow>
+  <div id="cam" data-layout-allow-overlap data-layout-ignore>
+      <!-- Title bar -->
+      <div id="titlebar" class="abs">
+        <div class="tb-left">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          <svg class="ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
+          <svg class="ic" viewBox="0 0 24 24" style="opacity: 0.4"><path d="M9 6l6 6-6 6" /></svg>
+        </div>
+        <div class="tb-right">
+          <div class="win"><svg class="ic" viewBox="0 0 12 12"><path d="M1 6h10" /></svg></div>
+          <div class="win"><svg class="ic" viewBox="0 0 12 12"><rect x="1.5" y="1.5" width="9" height="9" /></svg></div>
+          <div class="win"><svg class="ic" viewBox="0 0 12 12"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" /></svg></div>
+        </div>
+      </div>
+
+      <!-- Sidebar tab Code -->
+      <div id="sidebar" class="abs">
+        <div class="brand abs">
+          <b>Claude</b>
+          <svg class="ic" viewBox="0 0 24 24" style="color: #6b695f"><rect x="3.5" y="5" width="17" height="14" rx="2.5" /><path d="M9 5v14" /></svg>
+        </div>
+        <div id="modes" class="abs">
+          <div class="seg"><svg class="ic" viewBox="0 0 24 24"><path d="M5 18.5V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z" /></svg>Chat</div>
+          <div class="seg"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="2" /><path d="M9 20h6" /></svg>Cowork</div>
+          <div id="seg-code" class="seg on"><svg class="ic" viewBox="0 0 24 24"><path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5" /></svg>Code</div>
+        </div>
+        <div id="nav-new" class="nav abs"><span class="plus"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg></span>New session</div>
+        <div id="nav-sched" class="nav abs"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>Scheduled</div>
+        <div id="nav-cust" class="nav abs"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>Customize</div>
+        <div class="side-label abs">Sessions</div>
+        <div id="ses-list" class="abs">
+          <div id="ses-new" class="ses abs"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>Rekap Pagi</div>
+          <div id="ses-old">
+            <div class="ses">Perbaiki form kontak di landing page</div>
+            <div class="ses">Tambah halaman FAQ webinar</div>
+            <div class="ses">Rapikan script deploy</div>
+            <div class="ses">Update harga paket di pricing</div>
+            <div class="ses">Cek link rusak di blog</div>
+            <div class="ses">Migrasi gambar ke WebP</div>
+          </div>
+        </div>
+        <div id="profile" class="abs">
+          <div class="avatar">A</div>
+          <div>
+            <div class="pname">Alex</div>
+            <div class="pplan">Max plan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Home tab Code -->
+      <div id="pg-home" class="page abs">
+        <div id="home-greet" class="abs">
+          <svg viewBox="0 0 100 100">
+            <g stroke="#d97757" stroke-width="9" stroke-linecap="round">
+              <path d="M50 50L50 8" /><path d="M50 50L74 14" /><path d="M50 50L90 30" /><path d="M50 50L94 56" />
+              <path d="M50 50L82 82" /><path d="M50 50L58 94" /><path d="M50 50L30 90" /><path d="M50 50L10 70" />
+              <path d="M50 50L8 44" /><path d="M50 50L22 18" />
+            </g>
+          </svg>
+          <span>Morning, Alex</span>
+        </div>
+        <div id="home-box" class="abs box">
+          <div class="ph abs">Describe a task for Claude Code…</div>
+          <div class="in-row abs">
+            <div class="pill"><svg class="ic" viewBox="0 0 24 24"><path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" /></svg>my-app-web</div>
+            <div class="pill"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2" /><path d="M2.5 19h19" /></svg>Local</div>
+            <div class="pill" style="border: none">Opus <svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" /></svg></div>
+            <div class="sendb"><svg class="ic" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daftar Scheduled tasks -->
+      <div id="pg-list" class="page abs">
+        <div id="ls-title" class="abs h-serif">Scheduled tasks</div>
+        <div id="ls-sub" class="abs muted">Run Claude Code on a schedule, from an API call, or when something happens on GitHub.</div>
+        <div id="ls-new" class="abs btn dark"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>New task</div>
+        <div id="ls-head" class="abs">
+          <span class="abs colA" style="top: 8px">Name</span>
+          <span class="abs colB" style="top: 8px">Trigger</span>
+          <span class="abs colC" style="top: 8px">Last run</span>
+          <span class="abs colD" style="top: 8px">Runs on</span>
+        </div>
+        <div id="ls-row" class="abs">
+          <span class="abs colA nm">Cek PR mingguan</span>
+          <span class="abs colA sb">my-app-web</span>
+          <span class="abs colB cell"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>Weekly · Mon 09:07</span>
+          <span class="abs colC cell">Oct 26 · Succeeded</span>
+          <span class="abs colD cell"><svg class="ic" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z" /></svg>Cloud</span>
+          <span class="abs tgl"></span>
+        </div>
+        <div id="menu-new" class="abs">
+          <div id="mi-local" class="mi abs">
+            <div class="mic"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2" /><path d="M2.5 19h19" /></svg></div>
+            <div>
+              <div class="mt">Local</div>
+              <div class="md">Runs on this computer while it's on</div>
+            </div>
+          </div>
+          <div id="mi-cloud" class="mi abs">
+            <div class="mic"><svg class="ic" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z" /></svg></div>
+            <div>
+              <div class="mt">Cloud</div>
+              <div class="md">Runs on Anthropic's cloud, even when your laptop is closed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form New scheduled task -->
+      <div id="pg-form" class="page abs">
+        <div id="f-head" class="abs">
+          <svg class="ic" viewBox="0 0 24 24" style="color: #57554d"><path d="M15 6l-6 6 6 6" /></svg>
+          <span class="t h-serif">New scheduled task</span>
+          <span class="tag"><svg class="ic" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z" /></svg>Cloud</span>
+        </div>
+        <div id="f-cancel" class="abs btn ghost">Cancel</div>
+        <div id="f-create" class="abs btn"><div class="off"></div><div class="on"></div><span>Create</span></div>
+
+        <div class="flabel abs" style="top: 100px">Name</div>
+        <div id="f-name" class="abs field">
+          <div class="ring"></div>
+          <div class="ph abs">e.g. Morning recap</div>
+          <div class="caret0 abs"></div>
+          <div class="val abs">Rekap Pagi</div>
+        </div>
+
+        <div class="flabel abs" style="top: 198px">Instructions</div>
+        <div id="f-instr" class="abs field">
+          <div class="ring"></div>
+          <div class="ph abs">Describe what Claude should do every time this task runs…</div>
+          <div class="caret0 abs"></div>
+          <div id="prompt" class="abs">
+            <div id="pr-a">Kamu asisten pagi untuk Alex. Cek Google Calendar untuk jadwal hari ini. Cek Gmail untuk email yang masuk sejak kemarin sore, ambil yang dari klien atau yang butuh balasan. Kirim satu pesan ke Slack: daftar meeting dengan jamnya, dan tiga email paling penting beserta alasannya.</div>
+            <div id="pr-b"><span id="hl">Kalau kalender kosong dan nggak ada email penting, jangan kirim apa-apa.</span></div>
+          </div>
+          <div class="in-row abs">
+            <div class="pill"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2" /><circle cx="6" cy="18" r="2" /><circle cx="18" cy="8" r="2" /><path d="M6 8v8M18 10c0 4-6 3-11.5 6.5" /></svg>No repository<svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" /></svg></div>
+            <div class="pill"><svg class="ic" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z" /></svg>Default<svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" /></svg></div>
+            <div id="f-model" class="pill abs">
+              <span class="lb"><span id="mdl-old">Opus · High</span><span id="mdl-new" class="alt">Sonnet · High</span></span>
+              <svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" /></svg>
+            </div>
+          </div>
+        </div>
+        <div id="menu-model" class="abs">
+          <div id="mm-opus" class="mm abs"><div class="mt">Opus</div><div class="md">Most capable for complex work</div><div class="chk abs"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></div></div>
+          <div id="mm-sonnet" class="mm abs"><div class="mt">Sonnet</div><div class="md">Smart and efficient for everyday tasks</div><div class="chk abs"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></div></div>
+          <div id="mm-haiku" class="mm abs"><div class="mt">Haiku</div><div class="md">Fastest for quick answers</div></div>
+        </div>
+
+        <div class="flabel abs" style="top: 556px">Select a trigger</div>
+        <div id="tc-sched" class="tcard abs"><div class="sel"></div><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>Schedule</div>
+        <div id="tc-gh" class="tcard abs"><img class="logo" src="assets/logos/github.svg" alt="" />GitHub event</div>
+        <div id="tc-api" class="tcard abs"><svg class="ic" viewBox="0 0 24 24"><path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5M13.5 5l-3 14" /></svg>API</div>
+        <div id="f-srow" class="abs">
+          <div id="f-freq" class="abs field">
+            <div class="lbs"><span id="freq-old">Daily</span><span id="freq-new">Weekdays</span></div>
+            <svg class="ic" viewBox="0 0 24 24" style="width: 16px; height: 16px; color: #7b796f"><path d="M7 10l5 5 5-5" /></svg>
+          </div>
+          <div id="f-time" class="abs field">
+            <div class="ring"></div>
+            <div class="selbg abs"></div>
+            <div class="old abs">09:00</div>
+            <div class="val abs">07:07</div>
+            <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>
+          </div>
+          <div id="f-tz" class="abs"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17" /></svg>Asia/Jakarta (GMT+7)</div>
+          <div id="f-addtrig" class="abs"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>Add another trigger</div>
+        </div>
+
+        <div class="flabel abs" style="top: 714px">Connectors<span class="muted">All connected connectors are included by default.</span></div>
+        <div id="ch-gc" class="cchip abs"><img class="logo" src="assets/logos/gcal.svg" alt="" />Google Calendar<svg class="ic x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" /></svg></div>
+        <div id="ch-gm" class="cchip abs"><img class="logo" src="assets/logos/gmail.svg" alt="" />Gmail<svg class="ic x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" /></svg></div>
+        <div id="ch-sl" class="cchip abs"><img class="logo" src="assets/logos/slack.svg" alt="" />Slack<svg class="ic x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" /></svg></div>
+        <div id="ch-no" class="cchip abs"><img class="logo" src="assets/logos/notion.svg" alt="" />Notion<svg class="ic x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" /></svg></div>
+        <div id="ch-dr" class="cchip abs"><svg class="ic gen" viewBox="0 0 24 24"><path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" /></svg>Google Drive<svg class="ic x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" /></svg></div>
+        <div id="ch-li" class="cchip abs"><svg class="ic gen" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="4" /><path d="M9 12h6" /></svg>Linear<svg class="ic x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" /></svg></div>
+
+        <div id="menu-freq" class="abs">
+          <div id="fi-hourly" class="fi abs">Hourly</div>
+          <div id="fi-daily" class="fi abs">Daily<svg id="fi-daily-chk" class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></div>
+          <div id="fi-week" class="fi abs">Weekdays</div>
+          <div id="fi-weekly" class="fi abs">Weekly</div>
+        </div>
+      </div>
+
+      <!-- Detail task -->
+      <div id="pg-detail" class="page abs">
+        <div id="d-crumb" class="abs"><span>Scheduled</span><span>/</span><span style="color: #3a3934">Rekap Pagi</span></div>
+        <div id="d-title" class="abs h-serif">Rekap Pagi</div>
+        <div id="d-tgl" class="abs tgl"></div>
+        <div id="d-tgl-lb" class="abs">On</div>
+        <div id="d-edit" class="abs btn ghost">Edit</div>
+        <div id="d-run" class="abs btn dark"><svg class="ic" viewBox="0 0 24 24" style="fill: currentColor; stroke: none"><path d="M8 5.5v13l10.5-6.5z" /></svg>Run now</div>
+
+        <div id="d-instr" class="abs card">
+          <div class="ct abs">Instructions</div>
+          <div class="tx abs">Kamu asisten pagi untuk Alex. Cek Google Calendar untuk jadwal hari ini. Cek Gmail untuk email yang masuk sejak kemarin sore, ambil yang dari klien atau yang butuh balasan. Kirim satu pesan ke Slack: daftar meeting dengan jamnya, dan tiga email paling penting beserta alasannya. Kalau kalender kosong dan nggak ada email penting, jangan kirim apa-apa.</div>
+          <div class="ft abs">
+            <div class="pill">Sonnet · High</div>
+            <div class="pill">No repository</div>
+            <div class="pill">Default environment</div>
+          </div>
+        </div>
+        <div id="d-trig" class="abs card">
+          <div class="ct abs">Trigger</div>
+          <div class="big abs"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>Weekdays at 07:07</div>
+          <div class="sm abs">Asia/Jakarta · Next run tomorrow at 07:07</div>
+        </div>
+        <div id="d-conn" class="abs card">
+          <div class="ct abs">Connectors</div>
+          <div class="row abs">
+            <div class="pill"><img class="logo" src="assets/logos/gcal.svg" alt="" />Google Calendar</div>
+            <div class="pill"><img class="logo" src="assets/logos/gmail.svg" alt="" />Gmail</div>
+            <div class="pill"><img class="logo" src="assets/logos/slack.svg" alt="" />Slack</div>
+          </div>
+        </div>
+        <div id="d-hist-h" class="abs">History</div>
+        <div id="d-empty" class="abs">No runs yet. Runs show up here when the schedule fires or you click Run now.</div>
+        <div id="d-runrow" class="abs">
+          <div id="d-runhover"></div>
+          <span class="badge"><svg id="d-spin" class="ic" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8" /></svg>Running</span>
+          <span>Started just now</span>
+          <span class="muted">· Run now</span>
+          <span class="open">Open<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg></span>
+        </div>
+      </div>
+
+      <!-- Sesi run -->
+      <div id="pg-session" class="page abs">
+        <div id="s-head" class="abs">
+          Rekap Pagi
+          <svg class="ic" viewBox="0 0 24 24" style="width: 15px; height: 15px"><path d="M7 10l5 5 5-5" /></svg>
+          <span class="tag"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>Scheduled run</span>
+          <span class="tag"><svg class="ic" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z" /></svg>Cloud</span>
+          <span class="rt">Sonnet · High</span>
+        </div>
+        <div id="s-bubble" class="abs">
+          <div class="tx">Kamu asisten pagi untuk Alex. Cek Google Calendar untuk jadwal hari ini. Cek Gmail untuk email yang masuk sejak kemarin sore, ambil yang dari klien atau yang butuh balasan. Kirim satu pesan ke Slack: daftar meeting dengan jamnya, dan tiga email paling penting beserta alasannya.</div>
+          <div class="more">Show more</div>
+        </div>
+        <div id="s-t1" class="s-tx abs">Oke, aku cek kalender hari ini dulu.</div>
+        <div id="s-k1" class="tool abs">
+          <img class="logo" src="assets/logos/gcal.svg" alt="" /><b>Google Calendar</b><span class="arg">· list events (today)</span>
+          <div class="st"><svg class="ic spin" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8" /></svg><div class="res"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>2 events</div></div>
+        </div>
+        <div id="s-t2" class="s-tx abs">Ada 2 meeting. Sekarang email sejak kemarin sore.</div>
+        <div id="s-k2" class="tool abs">
+          <img class="logo" src="assets/logos/gmail.svg" alt="" /><b>Gmail</b><span class="arg">· search messages (after: yesterday 17:00)</span>
+          <div class="st"><svg class="ic spin" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8" /></svg><div class="res"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>3 important</div></div>
+        </div>
+        <div id="s-t3" class="s-tx abs">3 email perlu dibalas hari ini. Aku kirim rekapnya ke Slack.</div>
+        <div id="s-k3" class="tool abs">
+          <img class="logo" src="assets/logos/slack.svg" alt="" /><b>Slack</b><span class="arg">· send message (DM Alex)</span>
+          <div class="st"><svg class="ic spin" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8" /></svg><div class="res"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>Sent</div></div>
+        </div>
+        <div id="s-t4" class="s-tx abs">Selesai. Rekap pagi sudah terkirim ke DM Slack kamu.</div>
+        <div id="s-status" class="abs">
+          <svg id="s-spark" viewBox="0 0 100 100">
+            <g stroke="#d97757" stroke-width="9" stroke-linecap="round">
+              <path d="M50 50L50 8" /><path d="M50 50L74 14" /><path d="M50 50L90 30" /><path d="M50 50L94 56" />
+              <path d="M50 50L82 82" /><path d="M50 50L58 94" /><path d="M50 50L30 90" /><path d="M50 50L10 70" />
+              <path d="M50 50L8 44" /><path d="M50 50L22 18" />
+            </g>
+          </svg>
+          <span>Working…</span>
+        </div>
+        <div id="s-reply" class="abs box"><div class="ph abs">Reply to Claude…</div></div>
+      </div>
+
+      <!-- Notifikasi Slack (Windows) -->
+      <div id="toast" class="abs">
+        <div class="app abs"><img src="assets/logos/slack.svg" alt="" />Slack</div>
+        <div class="ti abs">Claude</div>
+        <div class="bd abs">Rekap pagi, Selasa · Meeting hari ini: 10.00 Meeting vendor kemasan…</div>
+      </div>
+
+      <!-- Slack -->
+      <div id="slack" class="abs">
+        <div id="slack-in">
+          <div id="sk-top" class="abs">
+            <div id="sk-search" class="abs"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>Search Acme Studio</div>
+            <div class="winc">
+              <div><svg class="ic" viewBox="0 0 12 12"><path d="M1 6h10" /></svg></div>
+              <div><svg class="ic" viewBox="0 0 12 12"><rect x="1.5" y="1.5" width="9" height="9" /></svg></div>
+              <div><svg class="ic" viewBox="0 0 12 12"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" /></svg></div>
+            </div>
+          </div>
+          <div id="sk-rail" class="abs">
+            <div id="sk-ws" class="abs">K</div>
+            <div class="rl on abs" style="top: 66px"><div class="tile"><svg class="ic" viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5V20h-5.5v-5h-5v5H4z" /></svg></div>Home</div>
+            <div class="rl abs" style="top: 130px"><div class="tile"><svg class="ic" viewBox="0 0 24 24"><path d="M5 18.5V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z" /></svg></div>DMs</div>
+            <div class="rl abs" style="top: 194px"><div class="tile"><svg class="ic" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5h4" /></svg></div>Activity</div>
+            <div class="rl abs" style="top: 258px"><div class="tile"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="18" cy="12" r="1.3" /></svg></div>More</div>
+          </div>
+          <div id="sk-side" class="abs">
+            <div class="wsn abs">Acme Studio<svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" /></svg></div>
+            <div class="si abs" style="top: 58px"><svg class="ic" viewBox="0 0 24 24"><path d="M5 18.5V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8.5z" /></svg>Threads</div>
+            <div class="si abs" style="top: 88px"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20l1.5-5L16 4.5l3.5 3.5L9 18.5z" /></svg>Drafts &amp; sent</div>
+            <div class="sk-sec abs" style="top: 140px"><svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" /></svg>Channels</div>
+            <div class="si abs" style="top: 166px"><span class="hash">#</span>general</div>
+            <div class="si abs" style="top: 196px"><span class="hash">#</span>marketing</div>
+            <div class="si abs" style="top: 226px"><span class="hash">#</span>tim-sales</div>
+            <div class="si abs" style="top: 256px"><span class="hash">#</span>webinar</div>
+            <div class="sk-sec abs" style="top: 308px"><svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" /></svg>Direct messages</div>
+            <div class="si on abs" style="top: 334px">
+              <span class="av cl-av"><svg viewBox="0 0 100 100"><g stroke="#fff" stroke-width="10" stroke-linecap="round"><path d="M50 50L50 8" /><path d="M50 50L74 14" /><path d="M50 50L90 30" /><path d="M50 50L94 56" /><path d="M50 50L82 82" /><path d="M50 50L58 94" /><path d="M50 50L30 90" /><path d="M50 50L10 70" /><path d="M50 50L8 44" /><path d="M50 50L22 18" /></g></svg></span>Claude <span class="appb">APP</span>
+            </div>
+            <div class="si abs" style="top: 364px"><span class="av" style="background: #2e7d6b">R</span>Rina Kusuma</div>
+            <div class="si abs" style="top: 394px"><span class="av" style="background: #8e5a2b">B</span>Budi Santoso</div>
+            <div class="si abs" style="top: 424px"><span class="av" style="background: #3a5fa8">D</span>Dewi Lestari</div>
+          </div>
+          <div id="sk-main" class="abs">
+            <div id="sk-head" class="abs">
+              <span class="cl-av"><svg viewBox="0 0 100 100"><g stroke="#fff" stroke-width="10" stroke-linecap="round"><path d="M50 50L50 8" /><path d="M50 50L74 14" /><path d="M50 50L90 30" /><path d="M50 50L94 56" /><path d="M50 50L82 82" /><path d="M50 50L58 94" /><path d="M50 50L30 90" /><path d="M50 50L10 70" /><path d="M50 50L8 44" /><path d="M50 50L22 18" /></g></svg></span>
+              Claude <span class="appb">APP</span>
+            </div>
+            <div id="sk-intro" class="abs">
+              <div class="cl-av"><svg viewBox="0 0 100 100"><g stroke="#fff" stroke-width="9" stroke-linecap="round"><path d="M50 50L50 8" /><path d="M50 50L74 14" /><path d="M50 50L90 30" /><path d="M50 50L94 56" /><path d="M50 50L82 82" /><path d="M50 50L58 94" /><path d="M50 50L30 90" /><path d="M50 50L10 70" /><path d="M50 50L8 44" /><path d="M50 50L22 18" /></g></svg></div>
+              <div class="nm">Claude <span class="appb">APP</span></div>
+              <div class="ds">This is the very beginning of your direct message history with Claude.</div>
+            </div>
+            <div id="sk-day" class="abs"><span>Today</span></div>
+            <div id="sk-msg" class="abs">
+              <div class="cl-av"><svg viewBox="0 0 100 100"><g stroke="#fff" stroke-width="9" stroke-linecap="round"><path d="M50 50L50 8" /><path d="M50 50L74 14" /><path d="M50 50L90 30" /><path d="M50 50L94 56" /><path d="M50 50L82 82" /><path d="M50 50L58 94" /><path d="M50 50L30 90" /><path d="M50 50L10 70" /><path d="M50 50L8 44" /><path d="M50 50L22 18" /></g></svg></div>
+              <div class="who">Claude <span class="appb">APP</span><span class="tm">8:12 AM</span></div>
+              <div id="sk-body">
+                <div><b>Rekap pagi, Selasa</b></div>
+                <div class="gap"></div>
+                <div><b>Meeting hari ini</b></div>
+                <div class="li"><i>•</i><span id="mk1" class="mk">10.00 Meeting vendor kemasan (CV Sumber Kemasan)</span></div>
+                <div class="li"><i>•</i><span id="mk2" class="mk">14.00 Review laporan penjualan Oktober</span></div>
+                <div class="gap"></div>
+                <div><b id="mk3" class="mk">3 email perlu dibalas hari ini</b></div>
+                <div class="li"><i>1.</i>Rina (CV Sumber Kemasan): kirim revisi harga kemasan, minta konfirmasi sebelum meeting jam 10.</div>
+                <div class="li"><i>2.</i>Budi (PT Maju Retail): tanya status PO #2291, minta jawaban hari ini.</div>
+                <div class="li"><i>3.</i>Dewi (Keuangan): minta approval reimburse Oktober, tenggat besok.</div>
+              </div>
+            </div>
+            <div id="sk-comp" class="abs"><div class="ph abs">Message Claude</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kursor -->
+      <div id="ripple" class="abs"></div>
+      <div id="cursor" class="abs">
+        <svg id="cur-arrow" viewBox="0 0 30 30">
+          <path d="M5 3 L5 24 L10 19.5 L13.6 27 L17 25.4 L13.5 18 L20.5 18 Z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" />
+        </svg>
+        <svg id="cur-hand" viewBox="0 0 30 30">
+          <path d="M11 4.5a1.8 1.8 0 0 1 3.6 0V13l.2-2.4a1.8 1.8 0 0 1 3.5.2l.1 2.4.3-1.6a1.7 1.7 0 0 1 3.3.4v1.2l.2-.6a1.6 1.6 0 0 1 3.1.6v5.6c0 4.6-3 7.7-7.4 7.7h-1.6c-2.4 0-4-1-5.4-3L6.2 18a1.8 1.8 0 0 1 2.8-2.3l2 2.2z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Overlay editor (ukuran layar, di luar kamera) -->
+    <div id="note-rt" class="note abs"><div class="arw"></div><div class="k">Catatan</div><div class="v">Di sebagian akun tertulis "Routines"</div></div>
+    <div id="note-jam" class="note abs"><div class="arw"></div><div class="k">Dari dokumentasi Claude</div><div class="v">Jam bulat (07:00) bisa mulai telat beberapa menit</div></div>
+    <div id="badge-wrap" class="abs">
+      <div id="badge">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
+        <span>Weekdays</span><span class="dot">·</span><span>07:07</span><span class="dot">·</span><span>otomatis</span>
+      </div>
+    </div>
+
+    <!-- Kartu bab -->
+    <div id="card" class="abs">
+      <div id="card-in" class="abs">
+        <div id="card-bar" class="abs"></div>
+        <div id="card-label" class="abs">Trigger: jadwal</div>
+        <div id="card-title" class="abs"><span class="card-w num">02 ·</span> <span class="card-w">Rekap</span> <span class="card-w">pagi</span> <span class="card-w">otomatis</span></div>
+      </div>
+    </div>
+  </div>
+
+<!-- =================== 3. HELPER JS (taruh di <script>, di dalam IIFE, sesudah blok TIMING) =================== -->
+<script>
+  (function () {
+    /* TIMING:START */
+    /* TIMING:END */
+
+      const root = document.querySelector('[data-composition-id="scene"]');
+      const $ = (s) => root.querySelector(s);
+      const $$ = (s) => Array.from(root.querySelectorAll(s));
+      const cam = $("#cam");
+      const cursor = $("#cursor");
+      const ripple = $("#ripple");
+      const CARET = "2px 0 0 0 #141413";
+      const NOCARET = "0px 0 0 0 rgba(20,20,19,0)";
+
+      // Zoom kamera ke titik (cx, cy) UI dengan skala s. Titik dijepit supaya tepi frame tidak pernah kosong.
+      const camTo = (cx, cy, s) => {
+        if (s === 1) return { x: 0, y: 0, scale: 1 };
+        const hx = 960 / s, hy = 540 / s;
+        const x = Math.min(Math.max(cx, hx), 1920 - hx);
+        const y = Math.min(Math.max(cy, hy), 1080 - hy);
+        return { x: 960 - x * s, y: 540 - y * s, scale: s };
+      };
+      // Ujung kursor ada di (5,3) dalam SVG 30x30.
+      const cur = (x, y) => ({ x: x - 5, y: y - 3 });
+      const click = (tl, x, y, at) => {
+        tl.fromTo(ripple, { x, y, scale: 0.3, opacity: 0.9 }, { scale: 1.25, opacity: 0, duration: 0.45, ease: "power2.out", immediateRender: false }, at);
+        tl.fromTo(cursor, { scale: 1 }, { scale: 0.86, duration: 0.07, ease: "power1.in", yoyo: true, repeat: 1, transformOrigin: "5px 3px", immediateRender: false }, at);
+      };
+      // Kursor tiba di (x, y) tepat pada detik `arrive`.
+      const go = (tl, x, y, arrive, dur = 0.6) => tl.to(cursor, { ...cur(x, y), duration: dur, ease: "power2.inOut" }, arrive - dur);
+      const camGo = (tl, cx, cy, s, at, dur = 0.85) => tl.to(cam, { ...camTo(cx, cy, s), duration: dur, ease: "power3.inOut" }, at);
+      const press = (tl, el, at) => tl.fromTo(el, { scale: 1 }, { scale: 0.95, duration: 0.07, yoyo: true, repeat: 1, immediateRender: false }, at);
+      const showIn = (tl, el, at, dy = 8, dur = 0.3) => tl.fromTo(el, { opacity: 0, y: dy }, { opacity: 1, y: 0, duration: dur, ease: "power3.out", immediateRender: false }, at);
+      const fadeOut = (tl, el, at, dur = 0.18) => tl.to(el, { opacity: 0, duration: dur, ease: "power1.out" }, at);
+      const pop = (tl, el, at) => tl.fromTo(el, { opacity: 0, y: -6, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.2, ease: "power3.out", transformOrigin: "50% 0%", immediateRender: false }, at);
+      const swapPage = (tl, from, to, at) => {
+        tl.to(from, { opacity: 0, duration: 0.2, ease: "power1.out" }, at);
+        tl.fromTo(to, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", immediateRender: false }, at + 0.1);
+      };
+      // Pecah teks jadi span per huruf (layout tetap, huruf muncul satu per satu).
+      const charify = (el) => {
+        const t = el.textContent;
+        el.textContent = "";
+        return Array.from(t).map((c) => {
+          const s = document.createElement("span");
+          s.className = "ch";
+          s.textContent = c;
+          el.appendChild(s);
+          return s;
+        });
+      };
+      // Munculkan huruf di detik times[i]; caret ikut huruf terakhir sampai caretOff.
+      const typeAt = (tl, spans, times, caretOff) => {
+        spans.forEach((s, i) => {
+          tl.set(s, { opacity: 1, boxShadow: CARET }, times[i]);
+          const off = i < spans.length - 1 ? times[i + 1] : caretOff;
+          tl.set(s, { boxShadow: NOCARET }, off);
+        });
+      };
+      const linTimes = (n, t0, t1) => Array.from({ length: n }, (_, i) => t0 + ((t1 - t0) * i) / Math.max(1, n - 1));
+
+      const tl = gsap.timeline({ paused: true });
+      tl.set(cam, { transformOrigin: "0 0", x: 0, y: 0, scale: 1 }, 0);
+      tl.set(cursor, cur(1180, 720), 0);
+      tl.set(ripple, { opacity: 0 }, 0);
+      // ... beat di sini, waktu dari T.<klip> dan at(klip, kata, n) ...
+      window.__timelines = window.__timelines || {};
+      window.__timelines["scene"] = tl;
+    })();
+</script>

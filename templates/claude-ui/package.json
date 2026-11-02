@@ -1,0 +1,9 @@
+{
+  "name": "claude-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "npx --yes hyperframes@0.9.2 check",
+    "render": "npx --yes hyperframes@0.9.2 render"
+  }
+}

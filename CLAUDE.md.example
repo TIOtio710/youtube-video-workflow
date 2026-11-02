@@ -1,0 +1,41 @@
+# <Nama Channel> — channel YouTube (video panjang)
+
+Salin file ini jadi `CLAUDE.md` lalu isi bagian bertanda `<…>`. `CLAUDE.md` diabaikan git karena berisi setelan pribadi.
+
+Video YouTube 16:9 (1920×1080, 30 fps), durasi 8–10 menit. Isinya <tutorial dan penjelasan seputar …>. Bahasa <Indonesia>, sudut pandang sendiri. Konten, kalimat, aset, avatar, dan suara kreator lain tidak disalin.
+
+## Alur
+
+Ikuti skill `video-youtube` (`.claude/skills/video-youtube/SKILL.md`). Folder per video: `video/<YYYY-MM-DD-slug>/`. File final dinamai `<slug>.mp4`.
+
+## Render
+
+- Render hanya pakai HyperFrames (skill `hyperframes`, `hyperframes-cli`), lewat CLI, satu render sekaligus, per bab.
+- Jangan jalankan Studio/`hyperframes preview` kalau laptop berat. Pakai `check` + `snapshot`.
+- Skill craft lain (explainer, kinetic, lower-thirds, dll.) hanya referensi; penerapan tetap HTML + GSAP HyperFrames.
+
+## Footage tutorial
+
+- Mockup UI harus sesuai alur produk asli. Kalau ragu, minta rekaman/screenshot alur asli.
+- Jangan mengotomasi aplikasi atau situs yang syaratnya melarang akses otomatis (mis. claude.ai/Claude Desktop). Pakai mockup, rekaman manual, atau jalur resmi (API).
+- Samarkan data pribadi di rekaman.
+
+## Presenter dan suara
+
+- Presenter: <nama>, <sudah memberi izin wajah dan suaranya dipakai>.
+- Login HeyGen: `npx hyperframes auth login` (OAuth, dilakukan sendiri di terminal). Cek: `npx hyperframes auth status`.
+- Voice ID, look avatar, dan engine ada di `workflow.config.json`. Engine default `avatar_iii` (hemat). Jangan naik engine tanpa izin.
+- Avatar hanya untuk pembuka (dan transisi kalau dipilih). Penutup/CTA dipakai ulang dari template.
+
+## Kebijakan YouTube
+
+- Avatar dan suara AI realistis: centang "Altered or synthetic content" setiap upload.
+- Hindari pola produksi massal (kebijakan "inauthentic content"). Tiap video harus punya nilai sendiri: demo nyata, studi kasus, atau sudut pandang.
+
+## Audio
+
+Narasi dominan. Musik latar pelan (`audio.musicVolume` di config, default 0,14). SFX lembut dan jarang. Target −14 LUFS, puncak ≤ −1,5 dBTP.
+
+## Lingkungan
+
+<OS, versi Node, Python, FFmpeg>

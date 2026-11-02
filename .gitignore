@@ -1,0 +1,25 @@
+# Setelan pribadi (voice/avatar ID). Salin dari workflow.config.example.json.
+workflow.config.json
+CLAUDE.md
+.claude/settings.local.json
+
+# Produksi per video (besar, berisi wajah/suara asli)
+video/
+*.mp4
+*.mov
+*.wav
+*.mp3
+renders/
+
+# Skill pihak ketiga dipasang ulang lewat skills-lock.json
+.claude/skills/*
+!.claude/skills/video-youtube/
+
+# HyperFrames / Node
+.hyperframes/
+.media/
+node_modules/
+
+# Kredensial
+.env
+*.credentials

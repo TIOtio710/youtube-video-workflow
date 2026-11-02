@@ -1,0 +1,23 @@
+{
+  "language": "id",
+  "heygen": {
+    "voiceId": "ISI_VOICE_ID_HEYGEN",
+    "avatarLookId": "ISI_LOOK_ID_AVATAR",
+    "avatarEngine": "avatar_iii",
+    "aspect": "16:9",
+    "ttsMaxChars": 4800
+  },
+  "brand": {
+    "accent": "#FFD600",
+    "dark": "#141413",
+    "light": "#faf9f5"
+  },
+  "audio": {
+    "musicVolume": 0.14,
+    "loudnessLufs": -14,
+    "truePeakDb": -1.5
+  },
+  "paths": {
+    "sfx": ".claude/skills/media-use/audio/assets/sfx"
+  }
+}

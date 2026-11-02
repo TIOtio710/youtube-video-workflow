@@ -1,0 +1,99 @@
+<template>
+  <!-- Penutup CTA generik: avatar (kartu potret) + 3 panel tawaran + kartu ajakan. Teks lewat variabel komposisi.
+       Waktu panel = pecahan DUR, jadi tidak tergantung kata VO. Ganti ke at("outro", "kata") kalau ingin presisi. -->
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--dark, #141413);
+      font-family: "Inter", sans-serif;
+      color: #f5f3ec;
+      --accent: #ffd600;
+    }
+    .abs { position: absolute; }
+    #avw { left: 0; top: 0; width: 1920px; height: 1080px; z-index: 10; }
+    #av { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; object-fit: cover; }
+    #p1, #p2, #p3, .bf, #cta, #end { opacity: 0; }
+
+    .k { font-size: 28px; font-weight: 900; letter-spacing: 3px; color: var(--accent); }
+    #p1 { left: 130px; top: 180px; width: 1000px; }
+    #p1 h2 { margin-top: 16px; font-size: 84px; font-weight: 900; letter-spacing: -2.5px; line-height: 1.02; }
+    #p2 { left: 130px; top: 170px; width: 1000px; }
+    .bf { position: absolute; left: 0; width: 980px; height: 140px; border-radius: 24px; background: #1f1e1c; border: 1px solid #36342e; display: flex; align-items: center; gap: 28px; padding: 0 34px; font-size: 44px; font-weight: 900; letter-spacing: -1px; }
+    .bf .n { width: 68px; height: 68px; border-radius: 50%; background: var(--accent); color: #141413; font-size: 34px; display: flex; align-items: center; justify-content: center; flex: none; }
+    #bf1 { top: 70px; } #bf2 { top: 236px; } #bf3 { top: 402px; }
+    #p3 { left: 130px; top: 170px; width: 1000px; }
+    #cta { left: 0; top: 0; width: 1000px; padding: 48px 52px; border-radius: 30px; background: var(--accent); color: #141413; }
+    #cta h2 { margin-top: 14px; font-size: 80px; font-weight: 900; letter-spacing: -2.5px; line-height: 1; }
+    #cta p { margin-top: 24px; font-size: 36px; font-weight: 700; }
+    #end { left: 84px; top: 420px; width: 580px; padding: 30px 34px; border-radius: 26px; background: var(--accent); color: #141413; font-size: 42px; font-weight: 900; line-height: 1.1; letter-spacing: -1px; z-index: 12; }
+    #end span { display: block; margin-top: 10px; font-size: 30px; font-weight: 700; letter-spacing: 0; }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="scene"
+    data-width="1920"
+    data-height="1080"
+    data-layout-allow-overflow
+    data-layout-allow-overlap
+    data-composition-variables='[{"id":"brand","type":"string","label":"Nama brand","default":"NAMA BRAND"},{"id":"offer","type":"string","label":"Judul tawaran","default":"Judul tawaran kamu"},{"id":"b1","type":"string","label":"Manfaat 1","default":"Manfaat pertama"},{"id":"b2","type":"string","label":"Manfaat 2","default":"Manfaat kedua"},{"id":"b3","type":"string","label":"Manfaat 3","default":"Manfaat ketiga"},{"id":"ctaTitle","type":"string","label":"Judul ajakan","default":"Daftar sekarang"},{"id":"ctaLine","type":"string","label":"Baris ajakan","default":"Link ada di deskripsi"}]'
+  >
+    <div id="p1" class="abs">
+      <div class="k" data-var-text="brand">NAMA BRAND</div>
+      <h2 data-var-text="offer">Judul tawaran kamu</h2>
+    </div>
+    <div id="p2" class="abs">
+      <div class="k">CARA KERJANYA</div>
+      <div id="bf1" class="bf"><div class="n">1</div><span data-var-text="b1">Manfaat pertama</span></div>
+      <div id="bf2" class="bf"><div class="n">2</div><span data-var-text="b2">Manfaat kedua</span></div>
+      <div id="bf3" class="bf"><div class="n">3</div><span data-var-text="b3">Manfaat ketiga</span></div>
+    </div>
+    <div id="p3" class="abs">
+      <div id="cta" class="abs">
+        <div class="k" style="color: #141413" data-var-text="brand">NAMA BRAND</div>
+        <h2 data-var-text="ctaTitle">Daftar sekarang</h2>
+        <p data-var-text="ctaLine">Link ada di deskripsi</p>
+      </div>
+    </div>
+
+    <div id="avw" class="abs">
+      <!-- Ganti data-duration dengan durasi bab (DUR) setelah bab-build dijalankan. -->
+      <video id="av" class="clip" src="assets/avatar.mp4" muted playsinline data-start="0" data-duration="50"></video>
+    </div>
+    <div id="end" class="abs"><span data-var-text="ctaTitle" style="margin: 0; font-size: 42px; font-weight: 900">Daftar sekarang</span><span data-var-text="ctaLine">Link ada di deskripsi</span></div>
+  </div>
+
+  <script>
+    (function () {
+      /* TIMING:START */
+      /* TIMING:END */
+      const tl = gsap.timeline({ paused: true });
+      const show = (sel, t, from = { y: 18 }) =>
+        tl.fromTo(sel, { opacity: 0, ...from }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.45, ease: "power3.out", immediateRender: false }, t);
+      const hide = (sel, t) => tl.to(sel, { opacity: 0, y: -24, duration: 0.4, ease: "power2.in" }, t);
+      const frac = (f) => DUR * f;
+
+      // Avatar sumber vertikal (720×1280) yang di-pillarbox HeyGen → kartu potret.
+      tl.set("#avw", { transformOrigin: "50% 50%", clipPath: "inset(0% 34.2% 0% 34.2% round 30px)", scale: 0.94 }, 0);
+      tl.to("#avw", { x: 560, y: -40, scale: 0.8, duration: 0.9, ease: "power3.inOut" }, frac(0.08));
+      tl.to("#avw", { x: 0, y: 0, scale: 0.94, duration: 0.9, ease: "power3.inOut" }, frac(0.88));
+
+      show("#p1", frac(0.1));
+      hide("#p1", frac(0.33));
+      show("#p2", frac(0.35));
+      show("#bf1", frac(0.37), { x: -30 });
+      show("#bf2", frac(0.43), { x: -30 });
+      show("#bf3", frac(0.49), { x: -30 });
+      hide("#p2", frac(0.6));
+      show("#p3", frac(0.62));
+      show("#cta", frac(0.63), { y: 40, scale: 0.97 });
+      hide("#p3", frac(0.87));
+      show("#end", frac(0.9), { x: -30 });
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["scene"] = tl;
+    })();
+  </script>
+</template>
