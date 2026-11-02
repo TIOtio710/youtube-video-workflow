@@ -4,6 +4,8 @@
 //   ## <judul bab>                      → batas bab (satu panggilan TTS per bab)
 //   - `k1` teks paragraf...            → satu klip VO id k1
 //   Satu klip TTS (`intro`).  lalu baris "> ..." → satu klip id intro (paragraf digabung)
+//   ### Lafal  lalu baris "- Claude Code → Klod Kod" → ejaan bunyi untuk TTS. Script tetap ditulis normal;
+//   kata hasil TTS dikembalikan ke ejaan asli di <id>.words.json, jadi caption dan at() tetap "Claude Code".
 // Kenapa per bab: TTS ditagih per panggilan dengan pembulatan ke atas (terukur ±1 kredit per 30 dtk dimulai),
 // jadi 39 panggilan per paragraf ±40 kredit, sedangkan per bab cukup ±6 panggilan (±14 kredit).
 // Bab yang lebih panjang dari --max-chars dipecah di batas paragraf.
@@ -60,11 +62,51 @@ export function parseScript(md) {
     .filter((s) => s.clips.length);
 }
 
-// Tanda kutip dibuang supaya TTS tidak membacanya aneh.
-const speak = (t) => t.replace(/["“”]/g, "");
+// Daftar lafal dari bagian "### Lafal": [[ejaan asli, ejaan bunyi]], yang terpanjang dulu.
+export function parseLexicon(md) {
+  const lex = [];
+  let on = false;
+  for (const line of md.split(/\r?\n/)) {
+    if (/^#{2,}\s/.test(line)) {
+      on = /^#{2,}\s+Lafal\b/i.test(line);
+      continue;
+    }
+    const m = on && line.match(/^\s*-?\s*(.+?)\s*(?:→|->)\s*(.+?)\s*$/);
+    if (m) lex.push([m[1].replace(/[`*]/g, ""), m[2].replace(/[`*]/g, "")]);
+  }
+  return lex.sort((a, b) => b[0].length - a[0].length);
+}
+const escRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const norm = (t) => t.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 const dur = (f) => Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f]).toString());
 const r3 = (n) => Math.round(n * 1000) / 1000;
+
+const scriptMd = fs.readFileSync(path.join(folder, "script.md"), "utf8");
+const LEX = parseLexicon(scriptMd);
+// Teks yang dikirim ke TTS: tanda kutip dibuang, istilah diganti ejaan bunyi.
+const speak = (t) =>
+  LEX.reduce((acc, [from, to]) => acc.replace(new RegExp(`(?<![\\p{L}\\p{N}])${escRe(from)}(?![\\p{L}\\p{N}])`, "gu"), to), t.replace(/["“”]/g, ""));
+// Kembalikan kata hasil TTS ("Klod", "Kod") ke ejaan asli ("Claude Code") untuk caption dan at().
+function restore(words) {
+  const res = [];
+  for (let i = 0; i < words.length; ) {
+    const hit = LEX.find(([, to]) => {
+      const toks = to.split(/\s+/);
+      return toks.every((t, k) => words[i + k] && norm(words[i + k].text) === norm(t));
+    });
+    if (!hit) {
+      res.push(words[i++]);
+      continue;
+    }
+    const n = hit[1].split(/\s+/).length;
+    const last = words[i + n - 1];
+    const tail = last.text.match(/[^\p{L}\p{N}]+$/u)?.[0] ?? "";
+    res.push({ ...words[i], text: hit[0] + tail, end: last.end });
+    i += n;
+  }
+  return res;
+}
+if (LEX.length) console.log("lafal:", LEX.map(([a, b]) => `${a}→${b}`).join(", "));
 
 const out = path.join(folder, "vo");
 const raw = path.join(out, "_raw");
@@ -74,7 +116,11 @@ fs.mkdirSync(raw, { recursive: true });
 async function tts(key, text) {
   const mp3 = path.join(raw, `${key}.mp3`);
   const meta = path.join(raw, `${key}.json`);
-  if (fs.existsSync(mp3) && fs.existsSync(meta)) return { mp3, ...JSON.parse(fs.readFileSync(meta, "utf8")) };
+  if (fs.existsSync(mp3) && fs.existsSync(meta)) {
+    const cached = JSON.parse(fs.readFileSync(meta, "utf8"));
+    if (cached.text === undefined || cached.text === text) return { mp3, ...cached };
+    console.log(`cache ${key} beda teks (script atau lafal berubah), generate ulang`);
+  }
   const payload = await heygenJSON("/voices/speech", {
     method: "POST",
     headers: heygenAuthHeaders(),
@@ -117,7 +163,7 @@ function cut(mp3, from, to, wav) {
 }
 
 let calls = 0;
-for (const sec of parseScript(fs.readFileSync(path.join(folder, "script.md"), "utf8"))) {
+for (const sec of parseScript(scriptMd)) {
   const todo = sec.clips.filter((c) => (!only || only.has(c.id)) && !fs.existsSync(path.join(out, `${c.id}.wav`)));
   if (!todo.length) continue;
   // Pecah bab di batas paragraf kalau terlalu panjang untuk satu panggilan.
@@ -135,9 +181,9 @@ for (const sec of parseScript(fs.readFileSync(path.join(folder, "script.md"), "u
   for (const chunk of chunks) {
     if (!chunk.some((c) => todo.includes(c))) continue;
     const key = chunk.map((c) => c.id).join("+");
-    const cached = fs.existsSync(path.join(raw, `${key}.mp3`));
+    const before = fs.existsSync(path.join(raw, `${key}.mp3`)) ? fs.statSync(path.join(raw, `${key}.mp3`)).mtimeMs : 0;
     const { mp3, words, url } = await tts(key, chunk.map((c) => speak(c.text)).join(" "));
-    if (!cached) calls++;
+    if (fs.statSync(mp3).mtimeMs !== before) calls++;
     const total = dur(mp3);
     const groups = align(chunk, words);
     chunk.forEach((c, k) => {
@@ -151,7 +197,7 @@ for (const sec of parseScript(fs.readFileSync(path.join(folder, "script.md"), "u
       const to = k === chunk.length - 1 ? total : r3((g.at(-1).end + nextStart) / 2);
       const wav = path.join(out, `${c.id}.wav`);
       cut(mp3, from, to, wav);
-      const ws = g.map((w, n) => ({ id: `w${n}`, text: w.text, start: r3(w.start - from), end: r3(w.end - from) }));
+      const ws = restore(g).map((w, n) => ({ id: `w${n}`, text: w.text, start: r3(w.start - from), end: r3(w.end - from) }));
       fs.writeFileSync(path.join(out, `${c.id}.words.json`), JSON.stringify(ws, null, 1));
       if (chunk.length === 1) fs.writeFileSync(path.join(out, `${c.id}.url.txt`), url);
       console.log("ok", c.id, `${dur(wav).toFixed(2)} dtk`, `${ws.length} kata`);

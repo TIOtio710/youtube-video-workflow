@@ -23,6 +23,7 @@ Ikuti skill `video-youtube` (`.claude/skills/video-youtube/SKILL.md`). Folder pe
 ## Presenter dan suara
 
 - Presenter: <nama>, <sudah memberi izin wajah dan suaranya dipakai>.
+- Contoh suara: <path ke 2–3 naskah presenter yang sudah disetujui>. Dipakai agen `video-scriptwriter` sebagai acuan gaya bicara saat menjalankan `humanizer`.
 - Login HeyGen: `npx hyperframes auth login` (OAuth, dilakukan sendiri di terminal). Cek: `npx hyperframes auth status`.
 - Voice ID, look avatar, dan engine ada di `workflow.config.json`. Engine default `avatar_iii` (hemat). Jangan naik engine tanpa izin.
 - Avatar hanya untuk pembuka (dan transisi kalau dipilih). Penutup/CTA dipakai ulang dari template.

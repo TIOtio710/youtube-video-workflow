@@ -23,6 +23,20 @@ Setelan pribadi (voice, look avatar, brand, target audio) ada di `workflow.confi
 - **Dengan gate** (default): berhenti untuk persetujuan user setelah outline, script, storyboard, dan preview per bab.
 - **Ditinggal** (user bilang akan tidur/pergi): ajukan semua pertanyaan sekali di awal ([references/pertanyaan-awal.md](references/pertanyaan-awal.md)), lalu jalan sampai final tanpa berhenti. Gate dipindah ke akhir: user menonton final, revisi per bab. Izin generate HeyGen diminta sekali dengan batas kredit.
 
+## Peta agen
+
+Orkestrator (sesi utama) membagi kerja ke agen di `.claude/agents/`. Agen bertanda *pihak ketiga* opsional: pasang dari koleksi agen yang kamu pakai, atau biarkan orkestrator yang mengerjakan.
+
+| Tahap | Agen |
+| --- | --- |
+| Orkestrasi, keputusan, log | sesi utama (opsional: agen project manager pihak ketiga, mis. "Project Shepherd") |
+| Bedah referensi, paket upload | pihak ketiga, mis. "Video Optimization Specialist" (opsional) |
+| Outline, hook, script | `video-scriptwriter` (repo ini) |
+| Bab demo UI | `bab-mockup-builder` (repo ini) |
+| Review snapshot per bab | pihak ketiga, mis. "Evidence Collector" (opsional), dengan checklist: caption, tabrakan layout, sinkron kata, logo, teks ≥28 px |
+| Cek akhir | pihak ketiga, mis. "Reality Checker" (opsional) |
+| Bab ringan, timing plan, render, gabung | orkestrator |
+
 ## Alur
 
 1. **Pertanyaan awal** → `brief.md`. Pakai kartu di [references/pertanyaan-awal.md](references/pertanyaan-awal.md).
@@ -31,7 +45,7 @@ Setelan pribadi (voice, look avatar, brand, target audio) ada di `workflow.confi
    - **Docs resmi produk** yang didemokan. Wajib: nama fitur dan alur UI bisa berubah (contoh nyata: "Routines" berganti nama jadi "Scheduled tasks" tanpa banyak yang sadar).
    - Materi CTA (landing page) kalau ada upsell. Catat klaim yang boleh dipakai.
    - Amati-tiru: tiru struktur dan pola, jangan salin kalimat, aset, avatar, atau suara kreator lain.
-3. **Outline + script** → `script.md` dengan format yang dibaca mesin ([references/format-script.md](references/format-script.md)). Kalimat ditulis seperti bicara; jalankan skill `humanizer` kalau terasa kaku.
+3. **Outline + script** → delegasikan ke agen `video-scriptwriter`. Hasilnya `hooks.md` (3 hook + 3 judul ≤60 karakter) dan `script.md` dalam format yang dibaca mesin ([references/format-script.md](references/format-script.md)), dengan isyarat visual per paragraf dan bagian `### Lafal`. Agen itu wajib menjalankan `humanizer` dengan contoh suara asli. Mode dengan gate: user memilih hook. Mode ditinggal: pakai pilihan agen dan catat alasannya.
 4. **VO**: `node tools/heygen-vo.mjs video/<slug>` → satu panggilan TTS per bab, dipotong per paragraf dengan timestamp kata.
 5. **Avatar** (background, mulai sedini mungkin karena antre ±12–17 menit per klip): `node tools/heygen-video.mjs video/<slug> --audio vo/intro.url.txt --name intro`. Engine default `avatar_iii` (hemat). Cek wajah dan lip-sync begitu jadi. Penutup: pakai ulang dari `templates/outro-cta/` kalau sudah pernah dibuat.
 6. **Kerangka bab**: `plan.json` per bab → `node tools/bab-build.mjs video/<slug>/bab/<nn>`. Durasi tiap bab langsung pasti. Atur jeda di `plan.json` sampai total masuk target **sebelum** membuat visual.

@@ -8,6 +8,9 @@ Script dibaca langsung oleh `tools/heygen-vo.mjs`. Aturannya:
 - Tanda kutip dibuang sebelum TTS. Tulis angka dan jam sebagaimana diucapkan ("jam tujuh lewat tujuh"), karena caption diambil dari kata hasil TTS.
 - Baris lain (catatan, judul kerja, durasi) diabaikan tool.
 
+- **Isyarat visual**: baris terindentasi `  - visual: …` di bawah paragraf. Tool VO mengabaikannya; storyboard dan animator membacanya.
+- **Lafal**: bagian `### Lafal` (pakai `###`, bukan `##`, supaya tidak dianggap bab) berisi baris `- Claude Code → Klod Kod`. Script tetap ditulis dengan ejaan normal. `heygen-vo.mjs` mengirim ejaan bunyi ke TTS, lalu mengembalikan kata hasil TTS ke ejaan asli di `<id>.words.json`. Istilah beberapa kata jadi satu kata caption, jadi di `scene.html` dipanggil dengan huruf digabung: `at("d1", "claudecode")`. Mengubah daftar lafal membuat cache `vo/_raw` bab itu dianggap basi dan TTS dipanggil ulang (hapus juga wav klip terkait).
+
 Contoh lengkap: [`examples/script.example.md`](../../../../examples/script.example.md).
 
 ## Panjang

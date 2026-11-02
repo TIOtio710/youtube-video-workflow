@@ -20,7 +20,7 @@ Daftar sumbernya dikunci di [`skills-lock.json`](../skills-lock.json). Pasang ul
 | ✅ `video-youtube` | repo ini | Alur brief → final (skill utama) |
 | ✅ `hyperframes`, `hyperframes-cli`, `hyperframes-registry` | `heygen-com/hyperframes` | Kontrak render HTML → video, CLI check/snapshot/render |
 | ✅ `media-use` | `heygen-com/hyperframes` | Helper HeyGen API (`lib/heygen.mjs`, dipakai `tools/`), SFX bawaan, logo, musik |
-| `humanizer` | `blader/humanizer` | Merapikan kalimat script supaya tidak terdengar seperti AI |
+| ✅ `humanizer` | `blader/humanizer` | Wajib untuk agen `video-scriptwriter`: membuang pola tulisan AI dari naskah, dengan contoh suara presenter sebagai acuan |
 | `explainer-video`, `diagram-animation`, `isometric-animation`, `whiteboard-animation` | `iart-ai/explainer-video-skills` | Referensi craft (abaikan instruksi Remotion di dalamnya) |
 | `kinetic-typography` | `iart-ai/kinetic-typography-skills` | Referensi craft teks bergerak |
 | `caption-animation`, `lower-thirds` | `iart-ai/tiktok-video-skills` | Referensi craft caption dan lower third |
@@ -31,6 +31,7 @@ Daftar sumbernya dikunci di [`skills-lock.json`](../skills-lock.json). Pasang ul
 
 | Agen | Peran |
 | --- | --- |
+| ✅ `video-scriptwriter` ([`.claude/agents/`](../.claude/agents/video-scriptwriter.md)) | Outline, 3 hook, 3 judul, dan script.md dengan struktur retensi, isyarat visual, lafal, dan humanizer wajib |
 | ✅ `bab-mockup-builder` ([`.claude/agents/`](../.claude/agents/bab-mockup-builder.md)) | Subagen per bab demo berat, paralel, tanpa render |
 | `general-purpose` (bawaan Claude Code) | Riset luas atau tugas sampingan |
 | Agen orkestrator gaya "project shepherd" (opsional, dari koleksi agen pihak ketiga) | Memandu alur dan evaluasi; alurnya sendiri sudah ada di skill `video-youtube` |
